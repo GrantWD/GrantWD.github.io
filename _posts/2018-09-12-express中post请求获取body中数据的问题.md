@@ -2,7 +2,7 @@
 layout: post
 title: 'post请求获取body问题'
 subtitle: 'fetch中body数据类型问题，头部设置'
-date: 2018-08-23
+date: 2018-09-12
 categories: nodejs
 tags: javascript nodejs express 
 ---
