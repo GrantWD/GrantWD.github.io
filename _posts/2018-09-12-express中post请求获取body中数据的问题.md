@@ -8,7 +8,7 @@ tags: javascript nodejs express
 ---
 
 
-#在express服务端配置
+# 在express服务端配置
 ```javascript
 	var bodyParse = require('body-parser');
 	var multer = require('multer');
@@ -19,7 +19,7 @@ tags: javascript nodejs express
 
 	// 在方法中可以使用req.body获得数据
 ```
-#客户端配置
+# 客户端配置
 ```javascript
 	fetch('http://localhost:3000/add',{
 		method:'POST',
@@ -33,7 +33,7 @@ tags: javascript nodejs express
 	})
 ```
 
-#get请求
+# get请求
 将查询字符串参数追加到URL的末尾，将信息发送到服务器。
 ## 常见的问题：
 	- 查询字符中的每一个参数的名称和值都必须使用encodeURIComponent()进行编码，然后才可以放到URL的末尾，而且所有的名值对都必须有(&)分隔
