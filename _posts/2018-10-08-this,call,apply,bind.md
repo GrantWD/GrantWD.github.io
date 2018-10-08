@@ -4,7 +4,7 @@ title: 'this指向问题'
 subtitle: 'this指向调用它的对象'
 date: 2018-10-08
 categories:关于this的指向
-tags: javascript 
+tags: JavaScript 
 ---
 
 
