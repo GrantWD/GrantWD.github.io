@@ -1,0 +1,215 @@
+---
+layout: post
+title: 'this指向问题'
+subtitle: 'this指向调用它的对象'
+date: 2018-10-08
+categories:关于this的指向
+tags: javascript 
+---
+
+
+## this的指向，最后调用它的那个对象
+#### 1.this的几种使用场景
+1. 在方法中的this  
+
+```javascript
+    var name = "windowName"
+    function a () {
+        var name = "jack"
+        console.log(this.name)
+    }
+    // 执行a,由于a函数是在全局环境执行的相当于window.a()因此this指向的是window,,严格模式下是undefined
+    a()
+    // output 
+    // "windowName"
+```
+2. 定义在对象中的方法
+
+```javascript
+    var name = "windowName"
+    var a = {
+        name : "jack",
+        fn:function () {
+            console.log(this.name)
+        }
+    }
+    a.fn()
+    // output "jack"
+    // 对象中的方法通过对象来调用，因此指向的就是所在的对象
+```
+3.将对象中的方法赋值给变量后在执行
+
+```javascript
+    var name = "windowName"
+    var a = {
+        name:"jack",
+        fn : function () {
+            console.log(this.name)
+        }
+    }
+    var f = a.fn
+    f()
+    // 将对象中的方法那了出来，因为f所在的对象是window，所以指向的是window
+```
+4. 函数内部定义的函数,作为函数的方法
+
+```javascript
+    var name = "windowName"
+    function fn() {
+        var name = "jack"
+        innerFunction()
+        function innerFunction(){
+            console.log(this.name)
+        }
+    }
+    fn()
+    // output "windowName"
+    // 由于没有挂载在任何的对象上，所以对于没有挂载在任何对象上的函数在非严格模式下this指向的是window
+    // 在严格模式下是undefined
+```
+5. 匿名函数的this永远指向的是window由于没有名称，没有办法调用  
+
+6. 作为事件的回调方法
+```javascript
+    window.onclick = function(){
+        console.log(this)
+        // 相当于给window对象添加了一个方法this执行的是事件源
+    }
+```
+7. 作为定时器的回调函数setTimeout是window对象的方法，相当与在方法中执行一个方法中的this指向的是window对象
+
+```javascript
+    function test() {
+        console.log(this)
+    }
+    setTimeout(test, 1000)
+    // output 'window'
+```
+
+8. 构造函数中的this
+
+```javascript
+    function Person () {
+        name = "jack"
+        age = 25
+    }
+    Person.prototype.eat = function () {
+    // this指的是Person中的name
+        console.log(this.name)
+    }
+```
+
+#### 2.JS中的函数调用
+1. 作为一个函数调用
+
+```javascript
+var name = "windowName"
+function a(){
+    console.log(this)
+}
+// 作为一个函数调用，不属于任何的对象，就是一个函数，非严格模式指向的是window
+```
+2. 作为对象的方法调用
+
+```javascript
+    var a = {
+        fn : function () {
+            console.log(this)
+        }
+    }
+    a.fn()
+    // this指向a
+```
+3. 作为构造函数调用函数  
+如果函数调用使用了new关键字，则是构造函数，实际上是js函数是重新创建的对象
+
+```javascript
+    function MyFunction () {
+        this.name = "lydia"
+        this.secName = "jack"
+    }
+    var a = new MyFunction()
+    a.name
+    a.secName
+```
+
+#### 3.new的过程
+1. 创建一个空对象
+2. 将新对象的原型指向构造函数的原型(继承原型的方法)
+3. 使用call改变this的指向
+4. 如果没有返回值，或者返回一个非对象的值，则将对象作为新的返回值，如果返回值是一个新的对象那么直接返回这个对象
+
+```javascript
+    var a = new MyFunction()
+    // 模拟过程
+    var obj = {}
+    obj.__proto__= MyFunction.prototype
+    var result = MyFunction.call(obj)
+    return typeof result === 'object' ? result : obj
+```
+call 和apply方法是在特定的作用域中调用函数，实际上就是设置了函数的this的值，this的指向就是调用者  
+call()参数是直接列举出来的  
+apply()参数是一个数组或者是一个arguments对象
+
+
+#### 4.改变this的指向
+1. ES6中的箭头函数
+    - this指向始终指向函数定义时的this,而不是执行时，箭头函数中没有this绑定，必须通过作用域链来决定
+    - 如果箭头函数被非箭头函数包哈，则this绑定的是最近一层的非箭头函数的this,否则就是undefined
+2. 函数内部使用_this = this来缓存当前的this
+3. 使用apply、call、bind方法
+4. new 实例化一个新对象
+ 
+#### 5.ES5新增bind方法
+bind()方法，会创建一个函数的实例  
+返回值是一个绑定了指定环境的this不能该变，主要bind方法的调用，直接使用方法名称来调用
+
+```javascript
+    var color = "red"
+    var o = {
+        color: "blue"
+    }
+    function sayColor(){
+        console.log(this.color)
+    }
+    sayColor()
+    // red
+    var newSayColor = sayColor.bind(o)
+    newSayColor()
+    // 绑定了o的作用域blue
+    newSayColor.call(a)
+    // 重新绑定不会生效
+```
+###### bind方法创建的函数的特点
+bind()函数会创建一个新绑定函数，绑定函数与被调用函数鱼油相同的函数体(在ES5中)。调用绑定函数通常会导致执行包装函数。绑定函数具有内部属性  
+- [[BoundTargetFunction]] 包装的函数对象
+- [[BoundThis]]==在调用保证函数时始终作为this值传递的值==(因此bind返回的函数this值是无法改变的)
+- [[BoundArguments]]一个值列表，元素用作对包装函数的任何调用的第一个参数
+- [[call]]执行与此对象相关联的代码
+###### bind函数的应用
+经常犯的错误，将一个方法从对象中拿出来，然后再调用，希望方法中的this还是原来的对象(比如在回调函数中传人这个方法)。如果不做特殊的处理，一般会丢失原来的对象。这里使用bind()从原来的函数和原来的对象创建一个绑定函数，可以解决这个问题
+
+```javascript
+    var x = 10
+    var module = {
+        x : 100,
+        getX: function() {
+            return this.x
+        }
+    }
+    // OUTPUT 100
+    module.getX()
+    var retrieveX = module.getX
+    // OUTPUT 10,这里this的值发生了改变
+    retrieveX()
+    // 绑定函数的作用域
+    var boundGetX = retrieveX.bind(module)
+    // 这是后函数的this就是这个对象
+    boundGetX()
+```
+###### 配合setTimeout使用
+在默认情况下，使用window.setTimeout()时，this的关键字会指向window对象(或者全局)当使用类的方法时候，需要this引用类的实例，需要显示的把this绑定到回调函数方便使用
+
+
+
+
